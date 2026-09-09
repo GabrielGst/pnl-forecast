@@ -1,0 +1,35 @@
+---
+references:
+  - "File: /src/pnl_forecast/download.py"
+generationTime: 2026-09-09T21:11:01.221Z
+---
+flowchart TD
+    A["Module entry point"] --> B["main(argv)"]
+    B --> C["parse_args(argv)"]
+    C --> D["Configure logging"]
+    D --> E["Create KaggleApi"]
+    E --> F["Set Kaggle credentials path"]
+    F --> G["Authenticate with Kaggle"]
+    G --> H["download(api, competition, identifier, destination, force)"]
+
+    H --> I["Build download marker path"]
+    I --> J{"Marker exists and force is false?"}
+    J -->|Yes| K["Log skip message"]
+    K --> L["Return from download"]
+    J -->|No| M["Create destination directory"]
+    M --> N["Log download start"]
+    N --> O{"Download kind"}
+    O -->|competition| P["Download competition files"]
+    O -->|dataset| Q["Download dataset files"]
+    O -->|Other| R["Raise ValueError"]
+
+    P --> S["Iterate over ZIP files"]
+    Q --> S
+    S --> T{"More ZIP files?"}
+    T -->|Yes| U["Extract ZIP contents"]
+    U --> V["Delete ZIP file"]
+    V --> T
+    T -->|No| W["Create downloaded marker"]
+    W --> X["Return from download"]
+    X --> Y["Return 0 from main"]
+    Y --> Z["Exit through SystemExit"]
