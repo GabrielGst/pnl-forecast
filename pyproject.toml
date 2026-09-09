@@ -1,0 +1,32 @@
+[project]
+name = "pnl-forecast"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Gabriel Gostiaux", email = "gabriel.gostiaux@free.fr" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "duckdb>=1.5.5",
+    "fastapi>=0.141.1",
+    "google-cloud-bigquery>=3.45.0",
+    "google-cloud-storage>=3.14.1",
+    "kaggle>=2.2.4",
+    "pandas>=3.0.5",
+    "pyarrow>=25.0.1",
+    "pytest>=9.1.1",
+]
+
+[project.scripts]
+pnl-forecast = "pnl_forecast:main"
+
+[build-system]
+requires = ["uv_build>=0.12.9,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.6",
+]

@@ -1,0 +1,23 @@
+# Secrets / credentials
+.env
+*.json
+!pyproject.json
+
+# Data (never commit — licence terms)
+data/
+*.duckdb
+*.parquet
+*.csv
+*.zip
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# Terraform (added later)
+.terraform/
+*.tfstate
+*.tfstate.*
