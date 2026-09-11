@@ -10,6 +10,9 @@ data/
 *.csv
 *.zip
 
+# Logs
+src/logs/
+
 # Python
 __pycache__/
 *.pyc

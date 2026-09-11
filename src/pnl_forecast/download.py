@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-"""download.py - fetch Favorita en Olist data from Kaggle to a local raw/ directory.
+"""download.py - fetch Olist's marketing funnel and e-commerce datasets from Kaggle to a local raw/ directory.
 
-Requires ~/.kaggle/credentials.json to be set up with your Kaggle API credentials. Idempotent: re-running skips files if already present unless --force is passed.
+Requires ~/.kaggle/kaggle.json to be set up with your Kaggle API credentials. Idempotent: re-running skips files if already present unless --force is passed.
 
 Usage:
     uv run download.py --dest data/raw
@@ -20,6 +20,14 @@ from kaggle.api.kaggle_api_extended import KaggleApi
 
 logger = logging.getLogger("download")
 
+LOG_DIR = Path(__file__).resolve().parent.parent / "logs"
+
+SOURCES = [
+    # kind, identifier, subdir
+    ("dataset", "olistbr/brazilian-ecommerce", "olist_ecom"),
+    ("dataset", "olistbr/marketing-funnel-olist", "olist_funnel"),
+]
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Download kaggle sources for the pnl forecast")
     p.add_argument("--dest", type=Path, default=Path("data/raw"), help="Destination directory for downloaded files")
@@ -29,13 +37,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return p.parse_args(argv)
 
 def download(api: KaggleApi, kind: str, identifier: str, dest: Path, force: bool) -> None:
-    marker = dest / f".{identifier}.downloaded"
+    marker = dest / ".downloaded"
     if marker.exists() and not force:
         logger.info(f"Skipping {identifier} (already downloaded, use --force to re-download)")
         return
 
     dest.mkdir(parents=True, exist_ok=True)
-    logger.info(f"Downloading {identifier} {{kind}} -> {dest}...")
+    logger.info(f"Downloading {identifier} ({kind}) -> {dest}...")
 
     if kind == "competition":
         api.competition_download_files(identifier, path=str(dest), quiet=False)
@@ -55,15 +63,21 @@ def download(api: KaggleApi, kind: str, identifier: str, dest: Path, force: bool
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
     logging.basicConfig(
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-        level=logging.DEBUG if args.verbose else logging.INFO)
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler(LOG_DIR / "download.log"),
+        ])
 
     api = KaggleApi()
     api.config_file = '/home/gabri/.kaggle/kaggle.json'
     api.authenticate()
-    
-    download(api, "competition", "fmcg-sales-forecasting-challengess", args.dest / "fmcg-sales-forecasting", args.force)
+
+    for kind, identifier, subdir in SOURCES:
+        download(api, kind, identifier, args.dest / subdir, args.force)
 
     return 0
 
